@@ -1,0 +1,19 @@
+
+
+1. The RTT between 113.197.15.99 and 113.197.15.201 increases from ~3 ms to ~97 ms.
+   There are 21 routers before I get consistent timeouts.
+
+2. The reverse path goes through a different path. The trace from Singapore spend goes
+   through much more of the UNSW network than mine. The same is true for Telstra.
+   This may be due to switches only taking traffic from one direction (core-bound or edge-bound).
+
+3. 	Distance(km)	Min. Time (ms)
+   UQ   730             2.43
+   NUS	6310		21.0
+   TU   16110		53.7
+
+   The delay appears to be fairly inconsistent except it does increase very slightly as the packet size increases.
+   Processing delay is minimal.
+   Transmission delay increases with the size of the packet. this could be the source of the slight increase in delay with packet size.
+   Propagation delay is constant.
+   Therefore the source of the change in delay must be queueing. Traffic is unpredictable and most likely responsible for the wide range in delays.

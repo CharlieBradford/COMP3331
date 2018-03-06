@@ -1,0 +1,12 @@
+PING www.uq.edu.au (130.102.131.123): 722 data bytes
+730 bytes from 130.102.131.123: icmp_seq=0 ttl=244 time=20.831 ms
+730 bytes from 130.102.131.123: icmp_seq=1 ttl=244 time=19.527 ms
+730 bytes from 130.102.131.123: icmp_seq=2 ttl=244 time=18.605 ms
+730 bytes from 130.102.131.123: icmp_seq=3 ttl=244 time=19.038 ms
+730 bytes from 130.102.131.123: icmp_seq=4 ttl=244 time=18.867 ms
+730 bytes from 130.102.131.123: icmp_seq=5 ttl=244 time=18.195 ms
+730 bytes from 130.102.131.123: icmp_seq=6 ttl=244 time=18.231 ms
+
+--- www.uq.edu.au ping statistics ---
+7 packets transmitted, 7 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 18.195/19.042/20.831/0.848 ms

@@ -1,0 +1,55 @@
+PING www.tu-berlin.de (130.149.7.201): 722 data bytes
+730 bytes from 130.149.7.201: icmp_seq=0 ttl=232 time=314.044 ms
+730 bytes from 130.149.7.201: icmp_seq=1 ttl=232 time=313.858 ms
+730 bytes from 130.149.7.201: icmp_seq=2 ttl=232 time=313.154 ms
+730 bytes from 130.149.7.201: icmp_seq=3 ttl=232 time=314.479 ms
+730 bytes from 130.149.7.201: icmp_seq=4 ttl=232 time=320.528 ms
+730 bytes from 130.149.7.201: icmp_seq=5 ttl=232 time=314.484 ms
+730 bytes from 130.149.7.201: icmp_seq=6 ttl=232 time=314.028 ms
+730 bytes from 130.149.7.201: icmp_seq=7 ttl=232 time=314.697 ms
+730 bytes from 130.149.7.201: icmp_seq=8 ttl=232 time=314.615 ms
+730 bytes from 130.149.7.201: icmp_seq=9 ttl=232 time=315.366 ms
+730 bytes from 130.149.7.201: icmp_seq=10 ttl=232 time=313.687 ms
+730 bytes from 130.149.7.201: icmp_seq=11 ttl=232 time=314.098 ms
+730 bytes from 130.149.7.201: icmp_seq=12 ttl=232 time=314.038 ms
+730 bytes from 130.149.7.201: icmp_seq=13 ttl=232 time=314.547 ms
+730 bytes from 130.149.7.201: icmp_seq=14 ttl=232 time=314.074 ms
+730 bytes from 130.149.7.201: icmp_seq=15 ttl=232 time=315.160 ms
+730 bytes from 130.149.7.201: icmp_seq=16 ttl=232 time=315.092 ms
+730 bytes from 130.149.7.201: icmp_seq=17 ttl=232 time=313.941 ms
+730 bytes from 130.149.7.201: icmp_seq=18 ttl=232 time=316.103 ms
+730 bytes from 130.149.7.201: icmp_seq=19 ttl=232 time=314.737 ms
+730 bytes from 130.149.7.201: icmp_seq=20 ttl=232 time=314.074 ms
+730 bytes from 130.149.7.201: icmp_seq=21 ttl=232 time=314.348 ms
+730 bytes from 130.149.7.201: icmp_seq=22 ttl=232 time=314.021 ms
+730 bytes from 130.149.7.201: icmp_seq=23 ttl=232 time=314.199 ms
+730 bytes from 130.149.7.201: icmp_seq=24 ttl=232 time=314.268 ms
+730 bytes from 130.149.7.201: icmp_seq=25 ttl=232 time=315.409 ms
+730 bytes from 130.149.7.201: icmp_seq=26 ttl=232 time=314.022 ms
+730 bytes from 130.149.7.201: icmp_seq=27 ttl=232 time=315.312 ms
+730 bytes from 130.149.7.201: icmp_seq=28 ttl=232 time=314.164 ms
+730 bytes from 130.149.7.201: icmp_seq=29 ttl=232 time=313.882 ms
+730 bytes from 130.149.7.201: icmp_seq=30 ttl=232 time=314.419 ms
+730 bytes from 130.149.7.201: icmp_seq=31 ttl=232 time=314.585 ms
+730 bytes from 130.149.7.201: icmp_seq=32 ttl=232 time=314.640 ms
+730 bytes from 130.149.7.201: icmp_seq=33 ttl=232 time=321.064 ms
+730 bytes from 130.149.7.201: icmp_seq=34 ttl=232 time=314.491 ms
+730 bytes from 130.149.7.201: icmp_seq=35 ttl=232 time=314.112 ms
+Request timeout for icmp_seq 36
+Request timeout for icmp_seq 37
+Request timeout for icmp_seq 38
+730 bytes from 130.149.7.201: icmp_seq=39 ttl=232 time=313.139 ms
+730 bytes from 130.149.7.201: icmp_seq=40 ttl=232 time=313.132 ms
+730 bytes from 130.149.7.201: icmp_seq=41 ttl=232 time=313.789 ms
+730 bytes from 130.149.7.201: icmp_seq=42 ttl=232 time=314.092 ms
+730 bytes from 130.149.7.201: icmp_seq=43 ttl=232 time=314.460 ms
+730 bytes from 130.149.7.201: icmp_seq=44 ttl=232 time=314.049 ms
+730 bytes from 130.149.7.201: icmp_seq=45 ttl=232 time=314.079 ms
+730 bytes from 130.149.7.201: icmp_seq=46 ttl=232 time=314.052 ms
+730 bytes from 130.149.7.201: icmp_seq=47 ttl=232 time=313.848 ms
+730 bytes from 130.149.7.201: icmp_seq=48 ttl=232 time=314.591 ms
+730 bytes from 130.149.7.201: icmp_seq=49 ttl=232 time=314.169 ms
+
+--- www.tu-berlin.de ping statistics ---
+50 packets transmitted, 47 packets received, 6.0% packet loss
+round-trip min/avg/max/stddev = 313.132/314.577/321.064/1.429 ms
