@@ -1,0 +1,100 @@
+import sys
+from socket import AF_INET, SOCK_DGRAM, SOCK_STREAM, socket, timeout
+from time import time
+
+PORT_OFFSET = 50000
+LOCALHOST = '127.0.0.1'
+BUFSIZE = 1024
+
+time_ms = lambda: int(round(time() * 1000))
+
+
+def pingServer():
+    port = PORT_OFFSET + int(sys.argv[1])
+    sock = socket(AF_INET, SOCK_DGRAM)
+    sock.bind(("", port))
+    while True:
+        data, addr = sock.recvfrom(BUFSIZE)
+        [msgType, sender, message] = data.split(' ')
+
+
+def pingClient(peer):
+    sock = socket(AF_INET, SOCK_DGRAM)
+    peerId = sys.argv[1]
+
+    try:
+        port = int(peer) + PORT_OFFSET
+    except ValueError:
+        print('Peers must be referenced with a number')
+        return
+
+    message = 'PING {} no_data'.format(peerId)
+
+
+class Server:
+    def __init__(self, peer):
+        port = PORT_OFFSET + int(peer)
+        self.peer = peer
+        self.udp_sock = socket(AF_INET, SOCK_DGRAM)
+        self.udp_sock.bind((LOCALHOST, port))
+        self.alive = True
+
+    def listen(self):
+        while self.alive:
+            data, addr = self.udp_sock.recvfrom(BUFSIZE)
+            [msgType, sender, message] = data.split(' ')
+            if msgType == 'PING':
+                self.response(sender)
+
+    def ping(self, addr, client):
+        message = 'PING ' + str(self.peer) + ' no_data'
+        message = message.encode('utf-8')
+        port = addr + PORT_OFFSET
+        self.udp_sock.sendto(message,
+                             (LOCALHOST, port))
+        self.udp_sock.settimeout(0.25)
+        try:
+            data, addr = self.udp_sock.recvfrom(BUFSIZE)
+            msgType, sender = data.split(' ')[:2]
+        except timeout:
+            client.handleDeadPeer()
+
+    def response(self, addr):
+        message = 'RESPONSE ' + str(self.peer) + ' no_data'
+        message = message.encode('utf-8')
+        port = addr + PORT_OFFSET
+        self.udp_sock.sendto(message,
+                             (LOCALHOST, port))
+
+
+
+
+class Client:
+    def __init(self, peerId, nId, nnId):
+        self.peerId = peerId
+        self.nId = nId
+        self.nnId = nnId
+        self.tpc_sock = socket(AF_INET, SOCK_STREAM)
+
+
+    def userInput(self, server):
+        while True:
+            cmd = input('>').split(' ')
+
+            if cmd[0] == 'quit':
+                raise SystemExit
+            elif cmd[0] == 'ping':
+                server.ping(cmd[1])
+            elif cmd[0] == 'request':
+                self.request(cmd[1])
+
+    def request(self, request):
+        return
+
+if __name__ == "main":
+    peerId = int(sys.argv[1])
+    nId = int(sys.argv[2])
+    nnId = int(sys.argv[3])
+
+    client = Client(peerId, nId, nnId)
+    server = Server(peerId)
