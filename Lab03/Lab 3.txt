@@ -1,0 +1,9 @@
+2.7. Do from lab
+2.10 Commands:
+dig @. au
+dig @a.root-servers.net au
+dig @a.au edu.au
+dig @x.au unsw.edu.au
+dig @ns2.unsw.edu.au cse.unsw.edu.au
+dig @maestro.orchestra.cse.unsw.edu.au lyre00.cse.unsw.edu.au
+129.94.210.20
