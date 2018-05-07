@@ -1,6 +1,6 @@
 import sys
 from socket import AF_INET, SOCK_DGRAM, SOCK_STREAM, socket, timeout
-from Threading import thread
+from threading import Thread
 
 PORT_OFFSET = 50000
 LOCALHOST = '127.0.0.1'
@@ -11,27 +11,37 @@ def runClient(client):
     client.userInput()
 
 
-def runServer(server):
-    server.listen()
+def runServerUDP(server):
+    server.listenUDP()
+
 
 
 class Server:
-    def __init__(self, peer):
+    def __inlit__(self, peer):
         port = PORT_OFFSET + int(peer)
         self.peer = peer
         self.udp_sock = socket(AF_INET, SOCK_DGRAM)
+        self.tcp_sock = socket(AF_INET, SOCK_STREAM)
         self.udp_sock.bind((LOCALHOST, port))
+        self.tcp_sock.bind((LOCALHOST, port))
         self.alive = True
 
     def setClient(self, client):
         self.client = client
 
-    def listen(self):
+    def listenUDP(self):
         while self.alive:
             data, addr = self.udp_sock.recvfrom(BUFSIZE)
             [msgType, sender, message] = data.split(' ')
             if msgType == 'PING':
                 self.response(sender)
+
+    def listenTCP(self):
+        while self.alive:
+            data, addr = self.tcp_sock.recvfrom(BUFSIZE)
+            [msgType, sender, message] = data.split(' ')
+            if msgType == 'REQUEST':
+                self.sendFile(sender, message)
 
     def ping(self, addr):
         message = 'PING ' + str(self.peer) + ' no_data'
@@ -53,6 +63,8 @@ class Server:
         self.udp_sock.sendto(message,
                              (LOCALHOST, port))
 
+    def sendFile(self, sender, message):
+        return
 
 class Client:
     def __init(self, peerId, nId, nnId):
@@ -65,6 +77,7 @@ class Client:
         self.server = server
 
     def userInput(self):
+        print("Listening")
         while True:
             cmd = input('>').split(' ')
 
@@ -75,8 +88,14 @@ class Client:
             elif cmd[0] == 'request':
                 self.request(cmd[1])
 
-    def request(self, request):
+    def request(self, requestFile):
+        nSock = PORT_OFFSET + self.nId
+        message = "Request " + peerId + " " +  requestFile
+        message = message.encode("utf-8")
+        tpc_soc.sendto(message, (LOCALHOST, nSock))
+
         return
+
 
 
 if __name__ == "main":
@@ -90,11 +109,11 @@ if __name__ == "main":
     client.setServer(server)
     server.setClient(client)
 
-    c = thread(target=runClient, args=client)
-    s = thread(target=runServer, args=server)
+    c = Thread(target=runClient, args=client)
+    u = Thread(target=runServerUDP, args=server)
 
     try:
         c.start()
         s.start()
-    except KeyboardInterrupt:
+    except KeyboardInterrupt, SystemExit:
         print("")
