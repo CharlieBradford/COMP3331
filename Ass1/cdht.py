@@ -26,7 +26,7 @@ class TCPHandler(socketserver.BaseRequestHandler):
        """
     def handle(self):
         data = self.request.recv(1024).decode("utf-8")
-        print(data)
+        # print(data)
         type, arg1, arg2, arg3 = data.split(" ")
 
         tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -101,14 +101,14 @@ class UDPHandler(socketserver.BaseRequestHandler):
 
 
         data = self.request[0].decode('utf-8')
-        print(data)
+        # print(data)
         socket = self.request[1]
         type, origin, relationship = data.split(" ")
 
         if type == "png":
-            message = "prp " + str(my_id)
-            socket.sendto(bytes(message, 'ascii'), self.client_address)
-            print("Ping from {}".format(origin))
+            message = "prp " + str(my_id) + " -1"
+            socket.sendto(bytes(message, 'ascii'), ('127.0.0.1', PORT_OFFSET + int(origin)))
+            print("Ping from {}".format(self.client_address))
         elif type == "prp":
             'No action'
             print("Ping response from {}".format(origin))
@@ -149,6 +149,11 @@ def inputhandler():
             tcp_socket.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
             tcp_socket.send(bytes(message, 'ascii'))
             tcp_socket.detach()
+        elif args[0] == 'neighbours':
+            print neighbours
+        elif args[0] == 'establish':
+            udp_socket.sendto(bytes('est ' + my_id + ' 2', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[0]))
+            udp_socket.sendto(bytes('est ' + my_id + ' 3', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[1]))
 
 
 
