@@ -8,6 +8,8 @@ import sys
 LOCALHOST = ''
 PORT_OFFSET = 50000
 
+neighbours = [int(sys.argv[2]), int(sys.argv[3]), 0, 0]
+my_id = int(sys.argv[1])
 
 
 class TCPHandler(socketserver.BaseRequestHandler):
@@ -150,7 +152,7 @@ def inputhandler():
             tcp_socket.send(bytes(message, 'ascii'))
             tcp_socket.detach()
         elif args[0] == 'neighbours':
-            print neighbours
+            print(neighbours)
         elif args[0] == 'establish':
             udp_socket.sendto(bytes('est ' + my_id + ' 2', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[0]))
             udp_socket.sendto(bytes('est ' + my_id + ' 3', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[1]))
@@ -164,8 +166,6 @@ def inputhandler():
 
 
 # if __name__ == "__main__":
-neighbours = [int(sys.argv[2]), int(sys.argv[3]), 0, 0]
-my_id = int(sys.argv[1])
 
 
 
