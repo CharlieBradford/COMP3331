@@ -42,19 +42,23 @@ class TCPHandler(socketserver.BaseRequestHandler):
             """
 
             filename, origin = arg1, arg2
-            hash = int(filename) % 256
+            h = int(filename) % 256
 
-            if neighbours[2] > hash <= myid:
-                message = "rrp " + [filename, origin, my_id].join(" ")
-                self.request.send(bytes(message, 'ascii'))
+            if (neighbours[0] > h and h >= my_id) or (neighbours[0] < my_id and h >= my_id):
+                message = "rrp " + " ".join([filename, origin, str(my_id)])
                 status = "File " + filename + " is stored here."
                 action = "A response message, destined for peer " + origin + ", has been sent."
+                tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                tcp.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
+                tcp.send(bytes(message, 'ascii'))
+                tcp.close()
 
             else:
                 message = "rcq " + " ".join([filename, origin, arg3])
+                tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 tcp.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
                 tcp.send(bytes(message, 'ascii'))
-                tcp.detach()
+                tcp.close()
 
                 status = "File " + filename + " is not stored here."
                 action = "File request message has been forwarded to my successor."
@@ -73,8 +77,11 @@ class TCPHandler(socketserver.BaseRequestHandler):
             if my_id == int(origin):
                 print("Received a message from from peer " + location + ", which has file " + filename)
             else:
-                psocket.send(bytes(data))
-
+                tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                tcp.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
+                tcp.send(bytes(data, 'ascii'))
+                tcp.close()
+                print("Forwarded request response")
         elif type == "dep":
             origin = arg1
             if origin == neighbours[0]:
@@ -127,7 +134,6 @@ class UDPServer(socketserver.ThreadingUDPServer):
 
 def inputhandler():
 
-    tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     global neighbours, my_id
@@ -135,10 +141,10 @@ def inputhandler():
     while True:
         c = input().lower()
         args = c.split(' ')
-        if len(args) < 2: continue
         if args[0] == 'quit':
             _thread.interrupt_main()
         elif args[0] == 'ping':
+            if len(args) < 2: continue
             if int(args[1]) == neighbours[0]: relationship = 2
             elif int(args[1]) == neighbours[1]: relationship = 3
             else: relationship = -1
@@ -147,15 +153,20 @@ def inputhandler():
             udp_socket.sendto(bytes(message, 'ascii'), ('127.0.0.1', PORT_OFFSET + int(args[1])))
             print('Sending ping to {}'.format(args[1]))
         elif args[0] == 'request':
+            if len(args) < 2: continue
             message = 'rcq {} {} 0000'.format(args[1], my_id)
+            tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             tcp_socket.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
             tcp_socket.send(bytes(message, 'ascii'))
-            tcp_socket.detach()
+            tcp_socket.close()
         elif args[0] == 'neighbours':
-            print(neighbours)
+            print("First successor is peer " + str(neighbours[0]))
+            print("Second successor is peer " + str(neighbours[1]))
+            print("First predecessor is peer "  + str(neighbours[2]))
+            print("Second predecessor is peer " + str(neighbours[3]))
         elif args[0] == 'establish':
-            udp_socket.sendto(bytes('est ' + my_id + ' 2', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[0]))
-            udp_socket.sendto(bytes('est ' + my_id + ' 3', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[1]))
+            udp_socket.sendto(bytes('est ' + str(my_id) + ' 2', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[0]))
+            udp_socket.sendto(bytes('est ' + str(my_id) + ' 3', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[1]))
 
 
 
