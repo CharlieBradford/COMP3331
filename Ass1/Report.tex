@@ -1,0 +1,123 @@
+\documentclass[a4paper]{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumitem}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[latin1]{inputenc}
+\usepackage{csquotes}
+\usepackage{blindtext}
+\usepackage{xfrac}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{minted}
+\setlist[description]{leftmargin=\parindent,labelindent=\parindent}
+
+\hypersetup{
+		colorlinks=true,
+		linkcolor=blue,
+		urlcolor=blue,
+}
+
+\title{% 
+		COMP3331 \\
+\large CDHT Report}
+\author{Charlie Bradford z5114682}
+\date{\today}
+
+\begin{document}
+\vspace{-2cm}
+\maketitle
+
+\section{Program Design}
+
+The program consists of four concurrent threads.
+
+\subsection{Input Handler}
+This thread handles input from the user and can be used to request files, manual pings etc.
+
+\subsection{Successor Checker}
+This thread sends three pings spaced by one second to the peers successor every 30 seconds. If the successor doesn't respond to any of the three pings the peer assummes the successor is dead and intiates the process of fixing all nearby peers' successors and predecessors.
+
+\subsection{TCP Server}
+Handles and automatically responds to UDP messages. Responsibilities are:
+\begin{itemize}
+		\item Forwarding or replying to file request messages when appropriate
+		\item Alerting the user when a file has been found
+		\item Fixing the successors of its predecessor's two predecessors in the case of ungraceful peer death
+		\item Fixing its own successors when alerted of peer death
+\end{itemize}
+
+\subsection{UDP Server}
+Handles and automatically responds to UDP messages. Responsibilities are:
+\begin{itemize}
+		\item Responding to ping requests
+		\item Establishing predecessors when ping or establish messages are recieved
+		\item Letting Successor Checker know when a ping is responded to
+\end{itemize}
+
+\section{TCP Messages}
+
+\subsection{File Request}
+Used to request a file. \\
+Format: ``rcq \textless filename\textgreater  \textless origin\_of\_request\textgreater  0''\\
+
+Announced by peers when forwarding.
+
+\subsection{File Response}
+A response to a file request. \\
+Format: ``rrp \textless filename\textgreater  \textless origin\_of\_request\textgreater  \textless location\_of\_file\textgreater '' \\
+
+Sent directly to the origin of the request.
+
+\subsection{Peer Departure}
+A message sent by a departing peer or by a dead peers successor and predeccsor. \\
+Format: ``dep \textless origin\textgreater  \textless new\_successor\textgreater  \textless new\_second\_successor\textgreater '' \\
+
+A peer sends this message to it's two predecessors when it quits. Alternatively a peer sends this message to its second predecessor when its second predecessor informs it that its first predecessor is dead via an Ungraceful Peer Departure message.
+
+\subsection{Ungraceful Peer Departure}
+Sent by a peer to its second successor when its first successor is determined to be dead.\\
+Format: ``ded \textless origin\textgreater  \textless new\_second\_predecessor\textgreater  0000''
+
+
+\section{UDP Messages}
+
+\subsection{Ping Request}
+Generic ping. Sent to successor three times every 30 seconds automatically or to any peer in the CDHT manually with user input.\\
+Format: ``png \textless origin\_of\_request\textgreater  \textless relationship\textgreater ''
+
+\subsection{Ping Response}
+Response to ping, sent whenever a ping request is received.\\
+Format: ``prp \textless origin\_of\_response\textgreater  \textless relationship\textgreater ''
+
+\subsection{Establish Relationship}
+Used to establish a predecessor relationship.\\
+Format: ``est \textless origin\_of\_message\textgreater  \textless relationship\textgreater ''
+
+\section{Demonstration}
+\href{https://youtube.com/ORXNtc0MVlM}{Youtube Link}\footnote{https://youtube.com/ORXNtc0MVlM} \\
+
+Unfortunately I scrolled past the udp server really quickly but if you pause at \href{https://youtube.com/ORXNtc0MVlM?t=2m58s}{2:58} you can see the code that receives ping messages and sends the ping responses from a udp socket.
+
+\section{Other Information}
+This project was written in Python3. \\ \\
+
+There were some issues with the supplied set up code, including some strange quotation marks, so this was the setup script I used. 
+\begin{minted}{bash}
+xterm -hold -title "Peer 1" -e "python3 cdht.py 1 3 4" &
+xterm -hold -title "Peer 3" -e "python3 cdht.py  3 4 5" &
+xterm -hold -title "Peer 4" -e "python3 cdht.py  4 5 8" &
+xterm -hold -title "Peer 5" -e "python3 cdht.py  5 8 10" &
+xterm -hold -title "Peer 8" -e "python3 cdht.py  8 10 12" &
+xterm -hold -title "Peer 10" -e "python3 cdht.py  10 12 15" &
+xterm -hold -title "Peer 12" -e "python3 cdht.py  12 15 1" &
+xterm -hold -title "Peer 15" -e "python3 cdht.py  15 1 3" &
+\end{minted}
+
+\end{document}

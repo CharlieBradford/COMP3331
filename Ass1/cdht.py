@@ -1,4 +1,4 @@
-import multiprocessing
+# import multiprocessing
 import threading
 import time
 import socketserver
@@ -34,10 +34,7 @@ class TCPHandler(socketserver.BaseRequestHandler):
        """
     def handle(self):
         data = self.request.recv(1024).decode("utf-8")
-        # print(data)
         type, arg1, arg2, arg3 = data.split(" ")
-
-        tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         global neighbours, my_id
 
@@ -50,21 +47,33 @@ class TCPHandler(socketserver.BaseRequestHandler):
             filename, origin = arg1, arg2
             h = int(filename) % 256
 
-            if (neighbours[2] < h and h <= my_id) or (neighbours[2] > my_id and h > neighbours[2]):
+            if (neighbours[2] < h and h <= my_id) or (neighbours[2] > my_id and h > neighbours[2]) or h == my_id:
                 message = "rrp " + " ".join([filename, origin, str(my_id)])
                 status = "File " + filename + " is stored here."
                 action = "A response message, destined for peer " + origin + ", has been sent."
-                tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                tcp.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
-                tcp.send(bytes(message, 'ascii'))
-                tcp.close()
+                try:
+                    tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    tcp.connect(('127.0.0.1', PORT_OFFSET + int(origin)))
+                    tcp.send(bytes(message, 'ascii'))
+                    tcp.close()
+                except:
+                    print("Unable to connect")
+
 
             else:
                 message = "rcq " + " ".join([filename, origin, arg3])
-                tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                tcp.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
-                tcp.send(bytes(message, 'ascii'))
-                tcp.close()
+                try:
+                    tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    tcp.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
+                    tcp.send(bytes(message, 'ascii'))
+                    tcp.close()
+                except:
+                    print("Unable to connect, trying again in 30 seconds")
+                    time.sleep(30)
+                    tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    tcp.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
+                    tcp.send(bytes(message, 'ascii'))
+                    tcp.close()
 
                 status = "File " + filename + " is not stored here."
                 action = "File request message has been forwarded to my successor."
@@ -73,26 +82,17 @@ class TCPHandler(socketserver.BaseRequestHandler):
             print(action)
 
         elif type == "rrp":
-            """
-            If we are the origin of the request, return,
-            Else, send to predecessor 
-            """
 
             filename, origin, location = arg1, arg2, arg3
 
-            if my_id == int(origin):
-                print("Received a message from from peer " + location + ", which has file " + filename)
-            else:
-                tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                tcp.connect(('127.0.0.1', PORT_OFFSET + neighbours[0]))
-                tcp.send(bytes(data, 'ascii'))
-                tcp.close()
-                print("Forwarded request response")
+            print("Received a message from from peer " + location + ", which has file " + filename)
+
         elif type == "dep":
             origin = arg1
-            if origin == neighbours[0]:
-                print("Peer " + str(origin) + " has departed from the network.")
-            self.request.send(bytes("Departure confirmed.", "ascii"))
+            if origin != '-1': print("Peer " + str(origin) + " has departed from the network.")
+            print("My first successor is now " + arg2)
+            print("My second successor is now " + arg3)
+
 
             neighbours[0] = int(arg2)
             neighbours[1] = int(arg3)
@@ -100,6 +100,9 @@ class TCPHandler(socketserver.BaseRequestHandler):
         elif type == "ded":
             neighbours[2] = int(arg1)
             neighbours[3] = int(arg2)
+
+            print("My first predecessor is now " + arg1)
+            print("My second predecessor is now " + arg2)
 
             message = "dep -1 {} {}".format(my_id, neighbours[0])
             tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -125,13 +128,13 @@ class UDPHandler(socketserver.BaseRequestHandler):
         Request handler for pings
 
         "png" Ping request
-        Format: png <origin_of_request> <relationship> <no_output_flag>
+        Format: png <origin_of_request> <relationship>
 
         "prp" Ping response
-        Format: prp <origin_of_response> <relationship> <no_output_flag>
+        Format: prp <origin_of_response> <relationship>
 
-        "est" Establish predecessor
-        Format: est <origin_of_message> <relationship> 0
+        "est" Establish Relationship
+        Format: est <origin_of_message> <relationship>
 
     """
     def handle(self):
@@ -141,21 +144,21 @@ class UDPHandler(socketserver.BaseRequestHandler):
         data = self.request[0].decode('utf-8')
         # print(data)
         socket = self.request[1]
-        type, origin, relationship, secret = data.split(" ")
+        type, origin, relationship = data.split(" ")
 
         if type == "png":
-            message = "prp " + str(my_id) + " -1 " + secret
+            message = "prp " + str(my_id) + " -1"
             socket.sendto(bytes(message, 'ascii'), ('127.0.0.1', PORT_OFFSET + int(origin)))
-            if secret == '0': print("Ping from peer {}".format(origin))
+            print("Ping from peer {}".format(origin))
         elif type == "prp":
-            if secret == '0': print("Ping response from {}".format(origin))
-            ping_flag = False
+            print("Ping response from {}".format(origin))
+            if int(origin) == neighbours[0]: ping_flag = False
         elif type == "est":
             neighbours[int(relationship)] = int(origin)
             if relationship == '0':
                 print("My first successor is now peer {}".format(origin))
             elif relationship == '1':
-                print("My second sucessor is now peer {}".format(origin))
+                print("My second successor is now peer {}".format(origin))
             elif relationship == '2':
                 print("{} established as first predecessor".format(origin))
             else:
@@ -197,12 +200,11 @@ def inputhandler():
             UserAction.establish()
 
 def peer_check():
-    '''
+    """
     The neighbour is assumed to be dead, and if it doesn't respond
     within 3 pings, then neighbours are reestablished
 
-    :return:
-    '''
+    """
     global kill_flag, ping_flag, neighbours, my_id
 
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -217,7 +219,7 @@ def peer_check():
 
 
         peer_dead = True
-        message = "png {} -1 0".format(my_id)
+        message = "png {} -1".format(my_id)
 
         for _ in range(3):
             ping_flag = True
@@ -276,13 +278,24 @@ class UserAction:
     def ping(destination):
         global my_id, neighbours
 
-        if int(destination) == neighbours[0]: relationship = 2
-        elif int(destination) == neighbours[1]: relationship = 3
+        if destination == "successor":
+            destination = neighbours[0]
+        elif destination == "second":
+            destination = neighbours[1]
+        else:
+            try:
+                destination = int(destination)
+            except ValueException:
+                return
+
+        if destination == neighbours[0]: relationship = 2
+        elif destination == neighbours[1]: relationship = 3
         else: relationship = -1
 
-        udp = socket.socket(socket.AF_INET, socket.DGRAM)
 
-        message = "png {} {} 0".format(my_id, relationship)
+        udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        message = "png {} {}".format(my_id, relationship)
         udp.sendto(bytes(message, 'ascii'), ('127.0.0.1', PORT_OFFSET + destination))
         print('Sending ping to {}'.format(destination))
         return
@@ -315,8 +328,8 @@ class UserAction:
     def establish():
         global my_id, neighbours
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        udp_socket.sendto(bytes('est ' + str(my_id) + ' 2 0', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[0]))
-        udp_socket.sendto(bytes('est ' + str(my_id) + ' 3 0', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[1]))
+        udp_socket.sendto(bytes('est ' + str(my_id) + ' 2', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[0]))
+        udp_socket.sendto(bytes('est ' + str(my_id) + ' 3', 'ascii'), ('127.0.0.1', PORT_OFFSET + neighbours[1]))
         return
 
 
