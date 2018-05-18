@@ -61,6 +61,14 @@ Handles and automatically responds to UDP messages. Responsibilities are:
 		\item Letting Successor Checker know when a ping is responded to
 \end{itemize}
 
+\subsection{Design Tradeoffs}
+Ideally a peer would check its successor more often, to reduce lapses in communication. However this could overload the computer and significantly interfere with user input. Peer checking could also be done without output to prevent interference with user input, however it is important to demonstrate successful ping requests and responses.
+
+\subsection{Possible Extensions}
+It could be interesting to distribute actual files between the peers and implement a file transfer system. A peer could request a file and if the request went around the CDHT without response then the peer would assume that the file is unavailable, otherwise the the owner of the file could transfer it the requesting peer, who would then have it available for other peers to request.
+
+Another idea could be to have the main CDHT but also have several 'sub-peergroups' within. All members could request files but perhaps peers have confidentials files, only accessible to peers that share in a subgroup. This would be good in an office where file sharing is often required but certain files may be priviledged to a group of executives, or a group that has signed contracts with another company.
+
 \section{TCP Messages}
 
 \subsection{File Request}
